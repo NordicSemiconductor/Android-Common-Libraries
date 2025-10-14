@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -67,6 +66,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -234,33 +234,28 @@ internal fun DeviceListItem(
         }
 
         Column(
-            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.weight(1.0f)
         ) {
-            Row {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    val name = result.advertisingData.name ?: result.peripheral.name
-                    Text(
-                        text = name ?: stringResource(R.string.no_name),
-                        color = if (name != null) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = result.peripheral.address,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Show RSSI if available
-                RssiIcon(result.rssi)
-            }
+            val name = result.advertisingData.name ?: result.peripheral.name
+            Text(
+                text = name ?: stringResource(R.string.no_name),
+                color = if (name != null) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                },
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = result.peripheral.address,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
+
+        // Show RSSI if available
+        RssiIcon(result.rssi)
     }
 }
