@@ -31,9 +31,11 @@
 
 package no.nordicsemi.android.common.scanner.view
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -82,7 +84,14 @@ internal fun ScanEmptyView(locationRequiredAndDisabled: Boolean) {
 private fun openLocationSettings(context: Context) {
     val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // Fallback: This is generally the most robust setting screen intent.
+        // If this fails, the system is severely restricted or broken.
+        // Log the failure, or show a toast message to the user.
+        Log.e(e.message, "Failed to open location settings using ACTION_LOCATION_SETTINGS")
+    }
 }
 
 @Preview(showBackground = true)
