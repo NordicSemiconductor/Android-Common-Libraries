@@ -29,6 +29,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("unused")
+
 package no.nordicsemi.android.common.scanner.view
 
 import androidx.annotation.DrawableRes
@@ -64,6 +66,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -168,11 +171,13 @@ internal fun ScannerContent(
                     locationRequiredAndDisabled = isLocationRequiredAndDisabled,
                 )
             }
+
             is ScanningState.Error -> item {
                 ScanErrorView(
                     error = uiState.scanningState.error
                 )
             }
+
             is ScanningState.DevicesDiscovered -> {
                 if (uiState.scanningState.result.isEmpty()) {
                     item {
@@ -200,7 +205,7 @@ internal fun LazyListScope.DeviceListItems(
         DeviceListItem(scanResult)
     },
 ) {
-    items(devices) {device ->
+    items(devices) { device ->
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
@@ -219,6 +224,26 @@ internal fun DeviceListItem(
         .firstNotNullOfOrNull { ServiceUuids.getServiceInfo(it)?.icon }
         ?: R.drawable.outline_bluetooth_24,
 ) {
+    DeviceListItem(
+        peripheralIcon = peripheralIcon?.let { painterResource(it) },
+        title = result.advertisingData.name ?: result.peripheral.name
+            ?: stringResource(R.string.no_name),
+        subtitle = result.peripheral.address,
+        trailingContent = {
+            // Show RSSI if available
+            RssiIcon(result.rssi)
+        }
+    )
+}
+
+@OptIn(ExperimentalUuidApi::class)
+@Composable
+fun DeviceListItem(
+    peripheralIcon: Painter?,
+    title: String,
+    subtitle: String,
+    trailingContent: @Composable () -> Unit = { }
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,34 +253,26 @@ internal fun DeviceListItem(
     ) {
         peripheralIcon?.let {
             CircularIcon(
-                painter = painterResource(it),
+                painter = it,
                 iconSize = 30.dp
             )
         }
-
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.weight(1.0f)
         ) {
-            val name = result.advertisingData.name ?: result.peripheral.name
             Text(
-                text = name ?: stringResource(R.string.no_name),
-                color = if (name != null) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                },
+                text = title,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = result.peripheral.address,
+                text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-
-        // Show RSSI if available
-        RssiIcon(result.rssi)
+        trailingContent()
     }
 }
