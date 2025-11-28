@@ -158,34 +158,23 @@ internal fun ScannerContent(
     onClick: (ScanResult) -> Unit,
     deviceItem: @Composable (ScanResult) -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal)
-            .union(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp))
-            .asPaddingValues()
-    ) {
-        when (uiState.scanningState) {
-            is ScanningState.Loading -> item {
-                ScanEmptyView(
-                    locationRequiredAndDisabled = isLocationRequiredAndDisabled,
-                )
-            }
+    when (uiState.scanningState) {
+        is ScanningState.Loading ->
+            ScanEmptyView(locationRequiredAndDisabled = isLocationRequiredAndDisabled)
 
-            is ScanningState.Error -> item {
-                ScanErrorView(
-                    error = uiState.scanningState.error
-                )
-            }
+        is ScanningState.Error -> ScanErrorView(error = uiState.scanningState.error)
 
-            is ScanningState.DevicesDiscovered -> {
-                if (uiState.scanningState.result.isEmpty()) {
-                    item {
-                        ScanEmptyView(
-                            locationRequiredAndDisabled = isLocationRequiredAndDisabled
-                        )
-                    }
-                } else {
+        is ScanningState.DevicesDiscovered -> {
+            if (uiState.scanningState.result.isEmpty()) {
+                ScanEmptyView(locationRequiredAndDisabled = isLocationRequiredAndDisabled)
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = WindowInsets.displayCutout
+                        .only(WindowInsetsSides.Horizontal)
+                        .union(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp))
+                        .asPaddingValues()
+                ) {
                     DeviceListItems(
                         devices = uiState.scanningState.result,
                         onScanResultSelected = onClick,
@@ -227,7 +216,7 @@ internal fun DeviceListItem(
     DeviceListItem(
         peripheralIcon = peripheralIcon?.let { painterResource(it) },
         title = result.advertisingData.name ?: result.peripheral.name
-            ?: stringResource(R.string.no_name),
+        ?: stringResource(R.string.no_name),
         subtitle = result.peripheral.address,
         trailingContent = {
             // Show RSSI if available
@@ -242,7 +231,7 @@ fun DeviceListItem(
     peripheralIcon: Painter?,
     title: String,
     subtitle: String,
-    trailingContent: @Composable () -> Unit = { }
+    trailingContent: @Composable () -> Unit = { },
 ) {
     Row(
         modifier = Modifier

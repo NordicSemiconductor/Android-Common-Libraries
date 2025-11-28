@@ -36,7 +36,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -61,7 +61,7 @@ import no.nordicsemi.android.common.ui.view.WarningView
 internal fun ScanEmptyView(locationRequiredAndDisabled: Boolean) {
     WarningView(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(16.dp),
         painterResource = painterResource(R.drawable.outline_bluetooth_searching_24),
         title = stringResource(id = R.string.scan_empty_title),
