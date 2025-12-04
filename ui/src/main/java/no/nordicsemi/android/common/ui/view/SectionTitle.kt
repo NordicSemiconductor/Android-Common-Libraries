@@ -35,22 +35,23 @@ package no.nordicsemi.android.common.ui.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.common.ui.R
 
 /**
@@ -67,25 +68,26 @@ fun SectionTitle(
     painter: Painter,
     title: String,
     modifier: Modifier = Modifier,
-    menu: @Composable (() -> Unit)? = null,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    menu: @Composable (RowScope.() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CircularIcon(painter)
-
-        Spacer(modifier = Modifier.size(8.dp))
-
+        Icon(
+            painter = painter,
+            contentDescription = null,
+            tint = tint,
+        )
         Text(
             text = title,
             textAlign = TextAlign.Start,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
-        menu?.invoke()
+        menu?.invoke(this)
     }
 }
 
@@ -103,20 +105,34 @@ fun SectionTitle(
     icon: ImageVector,
     title: String,
     modifier: Modifier = Modifier,
-    menu: @Composable (() -> Unit)? = null,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    menu: @Composable (RowScope.() -> Unit)? = null,
 ) {
     SectionTitle(
         painter = rememberVectorPainter(image = icon),
         title = title,
+        modifier = modifier,
+        tint = tint,
         menu = menu,
-        modifier = modifier
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SectionTitlePreview() {
-    MaterialTheme {
-        SectionTitle(painter = painterResource(R.drawable.baseline_add_24), title = "Title")
-    }
+    SectionTitle(
+        painter = painterResource(R.drawable.baseline_add_24),
+        title = "Title",
+        menu = {
+            Switch(
+                checked = true,
+                onCheckedChange = {},
+            )
+            OutlinedButton(
+                onClick = {},
+            ) {
+                Text("Button")
+            }
+        }
+    )
 }
