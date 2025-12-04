@@ -2,18 +2,12 @@
 
 package no.nordicsemi.android.common.ui.view
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,13 +38,14 @@ fun ActionIconButton(
 ) {
     IconButton(
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabled && !isInProgress,
         onClick = onClick,
     ) {
         when {
             isInProgress -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(size = 24.dp),
+                    strokeWidth = 2.dp,
                     color = iconTint ?: ProgressIndicatorDefaults.circularColor
                 )
             }

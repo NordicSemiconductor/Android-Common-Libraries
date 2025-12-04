@@ -51,13 +51,15 @@ fun ActionOutlinedButton(
     OutlinedButton(
         modifier = modifier.defaultMinSize(minWidth = 120.dp),
         border = border,
-        enabled = enabled,
+        enabled = enabled && !isInProgress,
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         onClick = onClick,
     ) {
         when {
             isInProgress -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(size = 24.dp),
+                    strokeWidth = 2.dp,
                     color = iconTint ?: ProgressIndicatorDefaults.circularColor,
                 )
             }
