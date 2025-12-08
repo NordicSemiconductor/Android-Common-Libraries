@@ -34,6 +34,7 @@
 package no.nordicsemi.android.common.scanner.view
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +45,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
@@ -54,6 +55,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -70,6 +72,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,9 +89,12 @@ import no.nordicsemi.android.common.scanner.viewmodel.ScanningState
 import no.nordicsemi.android.common.scanner.viewmodel.UiState
 import no.nordicsemi.android.common.ui.view.CircularIcon
 import no.nordicsemi.android.common.ui.view.RssiIcon
+import no.nordicsemi.kotlin.ble.client.android.AdvertisingData
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
+import no.nordicsemi.kotlin.ble.client.android.preview.PreviewPeripheral
+import no.nordicsemi.kotlin.ble.core.Phy
+import no.nordicsemi.kotlin.ble.core.PrimaryPhy
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,6 +104,7 @@ fun ScannerView(
     state: ScanFilterState = rememberFilterState(),
     timeout: Duration = Duration.INFINITE,
     onScanningStateChanged: (Boolean) -> Unit = {},
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     deviceItem: @Composable (ScanResult) -> Unit = { scanResult ->
         DeviceListItem(scanResult)
     },
@@ -134,6 +141,7 @@ fun ScannerView(
                     }
                 },
                 state = pullToRefreshState,
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
             ) {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 DisposableEffect(uiState.isScanning) {
@@ -146,7 +154,8 @@ fun ScannerView(
                     isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
                     uiState = uiState,
                     onClick = onScanResultSelected,
-                    deviceItem = deviceItem
+                    verticalArrangement = verticalArrangement,
+                    deviceItem = deviceItem,
                 )
             }
         }
@@ -158,6 +167,7 @@ internal fun ScannerContent(
     isLocationRequiredAndDisabled: Boolean,
     uiState: UiState,
     onClick: (ScanResult) -> Unit,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     deviceItem: @Composable (ScanResult) -> Unit,
 ) {
     when (uiState.scanningState) {
@@ -174,8 +184,9 @@ internal fun ScannerContent(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = WindowInsets.displayCutout
                         .only(WindowInsetsSides.Horizontal)
-                        .union(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp))
-                        .asPaddingValues()
+                        .union(WindowInsets(left = 16.dp, right = 16.dp, top = 16.dp, bottom = 16.dp))
+                        .asPaddingValues(),
+                    verticalArrangement = verticalArrangement,
                 ) {
                     DeviceListItems(
                         devices = uiState.scanningState.result,
@@ -199,7 +210,7 @@ internal fun LazyListScope.DeviceListItems(
     items(devices) { device ->
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(4.dp))
                 .clickable { onScanResultSelected(device.latestScanResult) }
         ) {
             deviceItem(device.latestScanResult)
@@ -235,35 +246,129 @@ fun DeviceListItem(
     subtitle: String,
     trailingContent: @Composable () -> Unit = { },
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        peripheralIcon?.let {
-            CircularIcon(
-                painter = it,
-                iconSize = 30.dp
-            )
-        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.weight(1.0f)
+    OutlinedCard {
+        Row(
+            modifier = Modifier
+                .heightIn(min = 80.dp)
+                .padding(all = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-            )
+            peripheralIcon?.let {
+                CircularIcon(
+                    painter = it,
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1.0f)
+            ) {
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                )
+            }
+            trailingContent()
         }
-        trailingContent()
     }
+}
+
+@Preview
+@Composable
+private fun DeviceListItemPreview() {
+    DeviceListItem(
+        peripheralIcon = painterResource(R.drawable.outline_bluetooth_24),
+        title = "Nordic HRM",
+        subtitle = "12:34:56:78:9A:BC",
+        trailingContent = {
+            RssiIcon(rssi = -60)
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ScannerContentPreview_empty() {
+    ScannerContent(
+        isLocationRequiredAndDisabled = false,
+        uiState = UiState(
+            isScanning = true,
+            scanningState = ScanningState.Loading,
+        ),
+        onClick = {},
+        deviceItem = { DeviceListItem(it) }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ScannerContentPreview_error() {
+    ScannerContent(
+        isLocationRequiredAndDisabled = false,
+        uiState = UiState(
+            isScanning = true,
+            scanningState = ScanningState.Error("Internal error"),
+        ),
+        onClick = {},
+        deviceItem = { DeviceListItem(it) }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ScannerContentPreview() {
+    val scope = rememberCoroutineScope()
+
+    ScannerContent(
+        isLocationRequiredAndDisabled = false,
+        uiState = UiState(
+            isScanning = true,
+            scanningState = ScanningState.DevicesDiscovered(
+                result = listOf(
+                    ScannedPeripheral(
+                        scanResult = ScanResult(
+                            peripheral = PreviewPeripheral(
+                                scope = scope,
+                                name = "Nordic HRM",
+                                address = "12:34:56:78:9A:BC",
+                            ),
+                            isConnectable = true,
+                            advertisingData = AdvertisingData(raw = byteArrayOf(0x02, 0x01, 0x06)),
+                            rssi = -60,
+                            txPowerLevel = null,
+                            primaryPhy = PrimaryPhy.PHY_LE_1M,
+                            secondaryPhy = Phy.PHY_LE_1M,
+                            timestamp = System.currentTimeMillis(),
+                        ),
+                    ),
+                    ScannedPeripheral(
+                        scanResult = ScanResult(
+                            peripheral = PreviewPeripheral(
+                                scope = scope,
+                                name = "A device with a very long name",
+                                address = "00:11:22:33:44:55",
+                            ),
+                            isConnectable = true,
+                            advertisingData = AdvertisingData(raw = byteArrayOf(0x02, 0x01, 0x06)),
+                            rssi = -60,
+                            txPowerLevel = null,
+                            primaryPhy = PrimaryPhy.PHY_LE_1M,
+                            secondaryPhy = Phy.PHY_LE_1M,
+                            timestamp = System.currentTimeMillis(),
+                        ),
+                    )
+                )
+            ),
+        ),
+        onClick = {},
+        deviceItem = { DeviceListItem(it) }
+    )
 }

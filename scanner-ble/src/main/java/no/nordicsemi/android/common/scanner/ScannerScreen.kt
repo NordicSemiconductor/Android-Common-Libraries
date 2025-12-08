@@ -33,6 +33,7 @@
 
 package no.nordicsemi.android.common.scanner
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.scanner.view.DeviceListItem
 import no.nordicsemi.android.common.scanner.view.FilterDialog
 import no.nordicsemi.android.common.scanner.view.ScannerAppBar
@@ -68,6 +70,7 @@ fun ScannerScreen(
     state: ScanFilterState = rememberFilterState(),
     timeout: Duration = Duration.INFINITE,
     title: @Composable () -> Unit = { Text(stringResource(id = R.string.scanner_screen)) },
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     deviceItem: @Composable (ScanResult) -> Unit = { scanResult ->
         DeviceListItem(scanResult)
     },
@@ -97,8 +100,10 @@ fun ScannerScreen(
 
         ScannerView(
             state = state,
+            timeout = timeout,
             onScanningStateChanged = { isScanning = it },
             onScanResultSelected = { onResultSelected(DeviceSelected(it)) },
+            verticalArrangement = verticalArrangement,
             deviceItem = deviceItem,
         )
     }

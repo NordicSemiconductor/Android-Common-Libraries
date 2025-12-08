@@ -32,7 +32,6 @@
 package no.nordicsemi.android.common.scanner.view
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -47,14 +46,17 @@ import no.nordicsemi.android.common.ui.view.WarningView
 internal fun ScanErrorView(
     error: String?,
 ) {
-    val message = error ?: "Unknown reason"
+    var message = error ?: "Unknown reason"
+    if (!message.endsWith(".")) {
+       message += "."
+    }
     WarningView(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         painterResource = painterResource(R.drawable.outline_bluetooth_searching_24),
         title = stringResource(id = R.string.scan_failed_title),
-        hint = stringResource(id = R.string.scan_failed_info, message),
+        hint = message,
     )
 }
 
