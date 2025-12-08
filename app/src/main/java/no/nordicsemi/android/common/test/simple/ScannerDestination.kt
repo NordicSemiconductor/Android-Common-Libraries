@@ -31,18 +31,15 @@
 
 package no.nordicsemi.android.common.test.simple
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.common.scanner.data.CustomFilter
 import no.nordicsemi.android.common.scanner.data.OnlyNearby
 import no.nordicsemi.android.common.scanner.data.OnlyWithNames
-import no.nordicsemi.android.common.scanner.data.WithServiceUuid
 import no.nordicsemi.android.common.scanner.rememberFilterState
 import no.nordicsemi.android.common.scanner.view.FilterDialog
 import no.nordicsemi.android.common.scanner.view.ScannerView
