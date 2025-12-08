@@ -47,6 +47,7 @@ import no.nordicsemi.android.common.scanner.view.FilterDialog
 import no.nordicsemi.android.common.scanner.view.ScannerAppBar
 import no.nordicsemi.android.common.scanner.view.ScannerView
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
+import kotlin.time.Duration
 
 /**
  * A scanner screen with an AppBar and a list of devices.
@@ -56,6 +57,7 @@ import no.nordicsemi.kotlin.ble.client.android.ScanResult
  * @param modifier Modifier to be applied to the screen.
  * @param state The state of the scan filter. Use this to set a static filter and dynamic filters.
  * @param title Composable function to display the title of the App Bar.
+ * @param timeout The duration after which the scan will stop. Defaults to [Duration.INFINITE].
  * @param deviceItem Composable function to display each device in the list.
  */
 @Composable
@@ -64,6 +66,7 @@ fun ScannerScreen(
     onResultSelected: (ScannerScreenResult) -> Unit,
     modifier: Modifier = Modifier,
     state: ScanFilterState = rememberFilterState(),
+    timeout: Duration = Duration.INFINITE,
     title: @Composable () -> Unit = { Text(stringResource(id = R.string.scanner_screen)) },
     deviceItem: @Composable (ScanResult) -> Unit = { scanResult ->
         DeviceListItem(scanResult)

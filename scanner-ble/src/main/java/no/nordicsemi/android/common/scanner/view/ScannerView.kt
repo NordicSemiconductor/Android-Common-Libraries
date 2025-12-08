@@ -87,6 +87,7 @@ import no.nordicsemi.android.common.scanner.viewmodel.UiState
 import no.nordicsemi.android.common.ui.view.CircularIcon
 import no.nordicsemi.android.common.ui.view.RssiIcon
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -95,10 +96,11 @@ import kotlin.uuid.ExperimentalUuidApi
 fun ScannerView(
     onScanResultSelected: (ScanResult) -> Unit,
     state: ScanFilterState = rememberFilterState(),
+    timeout: Duration = Duration.INFINITE,
     onScanningStateChanged: (Boolean) -> Unit = {},
     deviceItem: @Composable (ScanResult) -> Unit = { scanResult ->
         DeviceListItem(scanResult)
-    }
+    },
 ) {
     val viewModel = hiltViewModel<ScannerViewModel>()
     viewModel.setFilterState(state)
@@ -117,7 +119,7 @@ fun ScannerView(
                 // This would start scanning on each orientation change,
                 // but there is a flag set in the ViewModel to prevent that.
                 // User needs to pull to refresh to start scanning again.
-                viewModel.initiateScanning(timeout = 4.seconds)
+                viewModel.initiateScanning(timeout = timeout)
             }
 
             val pullToRefreshState = rememberPullToRefreshState()
