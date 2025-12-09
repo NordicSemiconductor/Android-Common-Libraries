@@ -34,7 +34,7 @@ package no.nordicsemi.android.common.permissions.notification
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.notification.utils.NotAvailableReason
 import no.nordicsemi.android.common.permissions.notification.utils.NotificationPermissionState
