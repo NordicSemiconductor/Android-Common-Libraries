@@ -33,9 +33,9 @@
 <resources>
 
     <color name="appBarColor">#333f48</color>
-    <color name="colorError">#FFB4A9</color>
+    <!--<color name="colorError">#FFB4A9</color>
     <color name="colorWarning">#F58220</color>
-    <color name="colorSuccess">#00A651</color>
+    <color name="colorSuccess">#00A651</color>-->
     <color name="colorNeutral">#899296</color>
     <color name="colorNordicLogo">@android:color/white</color>
     <color name="colorNordicLogoText">@android:color/white</color>

@@ -34,8 +34,8 @@
 
     <color name="appBarColor">#00A9CE</color>
     <color name="colorError">#BA1B1B</color>
-    <color name="colorWarning">#F58220</color>
-    <color name="colorSuccess">#00A651</color>
+    <color name="colorWarning">#f1750b</color>
+    <color name="colorSuccess">#008d45</color>
     <color name="colorNeutral">#70787C</color>
     <color name="colorNordicLogo">#00A9CE</color>
     <color name="colorNordicLogoText">@android:color/black</color>

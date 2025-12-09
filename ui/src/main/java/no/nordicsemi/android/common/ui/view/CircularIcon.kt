@@ -69,7 +69,7 @@ fun CircularIcon(
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.secondary,
     enabled: Boolean = true,
-    size: Dp = 36.dp,
+    size: Dp = 40.dp,
     iconSize: Dp = 24.dp,
 ) {
     val padding = (size - iconSize) / 2

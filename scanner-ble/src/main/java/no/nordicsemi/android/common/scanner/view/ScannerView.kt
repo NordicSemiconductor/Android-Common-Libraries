@@ -38,22 +38,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -65,7 +62,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
@@ -227,7 +223,7 @@ internal fun DeviceListItem(
         ?: R.drawable.outline_bluetooth_24,
 ) {
     DeviceListItem(
-        peripheralIcon = peripheralIcon?.let { painterResource(it) },
+        iconPainter = peripheralIcon?.let { painterResource(it) },
         title = result.advertisingData.name ?: result.peripheral.name
         ?: stringResource(R.string.no_name),
         subtitle = result.peripheral.address,
@@ -241,43 +237,55 @@ internal fun DeviceListItem(
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun DeviceListItem(
-    peripheralIcon: Painter?,
+    iconPainter: Painter?,
     title: String,
     subtitle: String,
+    modifier: Modifier = Modifier,
     trailingContent: @Composable () -> Unit = { },
 ) {
-    OutlinedCard {
-        Row(
-            modifier = Modifier
-                .heightIn(min = 80.dp)
-                .padding(all = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            peripheralIcon?.let {
-                CircularIcon(
-                    painter = it,
-                )
-            }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.weight(1.0f)
-            ) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                )
-            }
-            trailingContent()
-        }
+    DeviceListItem(
+        modifier = modifier,
+        iconPainter = iconPainter,
+        headlineContent = {
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        supportingContent = {
+            Text(
+                text = subtitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        trailingContent = trailingContent
+    )
+}
+
+@OptIn(ExperimentalUuidApi::class)
+@Composable
+fun DeviceListItem(
+    iconPainter: Painter?,
+    headlineContent: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    overlineContent: @Composable () -> Unit = {},
+    supportingContent: @Composable () -> Unit = {},
+    trailingContent: @Composable () -> Unit = {},
+) {
+    OutlinedCard(modifier) {
+        ListItem(
+            headlineContent = headlineContent,
+            overlineContent = overlineContent,
+            supportingContent = supportingContent,
+            leadingContent = {
+                iconPainter?.let {
+                    CircularIcon(painter = it)
+                }
+            },
+            trailingContent = trailingContent,
+        )
     }
 }
 
@@ -285,7 +293,7 @@ fun DeviceListItem(
 @Composable
 private fun DeviceListItemPreview() {
     DeviceListItem(
-        peripheralIcon = painterResource(R.drawable.outline_bluetooth_24),
+        iconPainter = painterResource(R.drawable.outline_bluetooth_24),
         title = "Nordic HRM",
         subtitle = "12:34:56:78:9A:BC",
         trailingContent = {
@@ -354,7 +362,7 @@ private fun ScannerContentPreview() {
                             peripheral = PreviewPeripheral(
                                 scope = scope,
                                 name = "A device with a very long name",
-                                address = "00:11:22:33:44:55",
+                                address = "00000000-1234-1234-5678-1234567890AB",
                             ),
                             isConnectable = true,
                             advertisingData = AdvertisingData(raw = byteArrayOf(0x02, 0x01, 0x06)),
