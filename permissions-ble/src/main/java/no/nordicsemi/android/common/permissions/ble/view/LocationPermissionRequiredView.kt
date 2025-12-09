@@ -54,7 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import no.nordicsemi.android.common.permissions.ble.R
 import no.nordicsemi.android.common.permissions.ble.viewmodel.PermissionViewModel
 import no.nordicsemi.android.common.ui.view.WarningView

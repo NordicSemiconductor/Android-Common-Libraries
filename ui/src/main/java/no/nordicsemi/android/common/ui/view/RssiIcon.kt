@@ -36,10 +36,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,25 +64,24 @@ fun RssiIcon(rssi: Int) {
     ) {
         Image(
             painter = painterResource(id = getImageRes(rssi)),
-            contentDescription = null
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
         )
         Text(
             text = stringResource(id = R.string.dbm, rssi),
-            style = MaterialTheme.typography.labelSmall
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
 
 @DrawableRes
-private fun getImageRes(rssi: Int): Int {
-    return when {
-        rssi < MEDIUM_RSSI -> R.drawable.ic_signal_min
-        rssi < MAX_RSSI -> R.drawable.ic_signal_medium
-        else -> R.drawable.ic_signal_max
-    }
+private fun getImageRes(rssi: Int): Int = when {
+    rssi < MEDIUM_RSSI -> R.drawable.ic_signal_min
+    rssi < MAX_RSSI -> R.drawable.ic_signal_medium
+    else -> R.drawable.ic_signal_max
 }
 
-@Preview(showBackground = true, widthDp = 500)
+@Preview(showBackground = true, widthDp = 520)
 @Composable
 private fun RssiIconPreview() {
     MaterialTheme {
