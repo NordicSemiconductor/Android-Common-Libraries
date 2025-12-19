@@ -35,6 +35,13 @@ package no.nordicsemi.android.common.scanner
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -98,12 +105,18 @@ fun ScannerScreen(
             )
         }
 
+        val insets = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal)
         ScannerView(
             state = state,
             timeout = timeout,
             onScanningStateChanged = { isScanning = it },
             onScanResultSelected = { onResultSelected(DeviceSelected(it)) },
             verticalArrangement = verticalArrangement,
+            modifier = Modifier
+                .windowInsetsPadding(insets)
+                .consumeWindowInsets(insets)
+                .padding(horizontal = 16.dp),
             deviceItem = deviceItem,
         )
     }

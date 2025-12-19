@@ -34,24 +34,17 @@
 package no.nordicsemi.android.common.scanner.view
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -102,6 +95,7 @@ fun ScannerView(
     timeout: Duration = Duration.INFINITE,
     onScanningStateChanged: (Boolean) -> Unit = {},
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    contentPadding: PaddingValues = PaddingValues(vertical = 16.dp),
     deviceItem: @Composable (ScanResult) -> Unit = { scanResult ->
         DeviceListItem(scanResult)
     },
@@ -152,6 +146,7 @@ fun ScannerView(
                     uiState = uiState,
                     onClick = onScanResultSelected,
                     verticalArrangement = verticalArrangement,
+                    contentPadding = contentPadding,
                     deviceItem = deviceItem,
                 )
             }
@@ -165,6 +160,7 @@ internal fun ScannerContent(
     uiState: UiState,
     onClick: (ScanResult) -> Unit,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    contentPadding: PaddingValues = PaddingValues(vertical = 16.dp),
     deviceItem: @Composable (ScanResult) -> Unit,
 ) {
     when (uiState.scanningState) {
@@ -179,10 +175,7 @@ internal fun ScannerContent(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = WindowInsets.displayCutout
-                        .only(WindowInsetsSides.Horizontal)
-                        .union(WindowInsets(left = 16.dp, right = 16.dp, top = 16.dp, bottom = 16.dp))
-                        .asPaddingValues(),
+                    contentPadding = contentPadding,
                     verticalArrangement = verticalArrangement,
                 ) {
                     DeviceListItems(

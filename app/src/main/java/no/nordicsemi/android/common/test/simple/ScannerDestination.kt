@@ -32,10 +32,18 @@
 package no.nordicsemi.android.common.test.simple
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
@@ -111,8 +119,14 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
         )
     )
 
+    val insets = WindowInsets.displayCutout
+        .only(WindowInsetsSides.Horizontal)
     ScannerView(
-        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .windowInsetsPadding(insets)
+            .consumeWindowInsets(insets)
+            .padding(horizontal = 16.dp),
         onScanResultSelected = {
             navigationVM.navigateUpWithResult(ScannerDestinationId, it)
         },
