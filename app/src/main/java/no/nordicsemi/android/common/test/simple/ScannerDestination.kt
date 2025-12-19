@@ -31,8 +31,11 @@
 
 package no.nordicsemi.android.common.test.simple
 
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
@@ -109,6 +112,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
     )
 
     ScannerView(
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
         onScanResultSelected = {
             navigationVM.navigateUpWithResult(ScannerDestinationId, it)
         },
