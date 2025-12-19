@@ -97,6 +97,7 @@ import kotlin.uuid.ExperimentalUuidApi
 @Composable
 fun ScannerView(
     onScanResultSelected: (ScanResult) -> Unit,
+    modifier: Modifier = Modifier,
     state: ScanFilterState = rememberFilterState(),
     timeout: Duration = Duration.INFINITE,
     onScanningStateChanged: (Boolean) -> Unit = {},
@@ -137,7 +138,7 @@ fun ScannerView(
                     }
                 },
                 state = pullToRefreshState,
-                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                modifier = modifier,
             ) {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 DisposableEffect(uiState.isScanning) {
