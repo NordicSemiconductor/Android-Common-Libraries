@@ -79,7 +79,7 @@ fun RadioButtonGroup(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        viewEntity.items.onEach {
+        viewEntity.items.forEach {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 RadioButton(selected = it.isChecked, onClick = { onItemClick(it) })
                 Text(text = it.label, style = MaterialTheme.typography.labelMedium)
@@ -104,7 +104,7 @@ fun HorizontalLabelRadioButtonGroup(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        viewEntity.items.onEach {
+        viewEntity.items.forEach {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(selected = it.isChecked, onClick = { onItemClick(it) })
                 Text(text = it.label, style = MaterialTheme.typography.labelMedium)
