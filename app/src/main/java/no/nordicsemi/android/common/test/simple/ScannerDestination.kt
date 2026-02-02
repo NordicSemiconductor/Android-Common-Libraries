@@ -100,6 +100,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
     var isScanning by LocalScanningState.current
     var isFilterOpen by LocalFilterState.current
     val state = rememberFilterState(
+        // Here's an option to set global filtering based on the advertising data.
 //        filter = {
 //            ServiceUuid(Uuid.fromShortUuid(0x180D))
 //        },
