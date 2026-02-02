@@ -286,41 +286,14 @@ fun DeviceListItem(
     }
 }
 
-@Preview
-@Composable
-private fun DeviceListItemPreview() {
-    DeviceListItem(
-        iconPainter = painterResource(R.drawable.outline_bluetooth_24),
-        title = "Nordic HRM",
-        subtitle = "12:34:56:78:9A:BC",
-        trailingContent = {
-            RssiIcon(rssi = -60)
-        }
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun ScannerContentPreview_empty() {
     ScannerContent(
-        isLocationRequiredAndDisabled = false,
+        isLocationRequiredAndDisabled = true,
         uiState = UiState(
             isScanning = true,
             scanningState = ScanningState.Loading,
-        ),
-        onClick = {},
-        deviceItem = { DeviceListItem(it) }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ScannerContentPreview_error() {
-    ScannerContent(
-        isLocationRequiredAndDisabled = false,
-        uiState = UiState(
-            isScanning = true,
-            scanningState = ScanningState.Error("Internal error"),
         ),
         onClick = {},
         deviceItem = { DeviceListItem(it) }
@@ -375,5 +348,32 @@ private fun ScannerContentPreview() {
         ),
         onClick = {},
         deviceItem = { DeviceListItem(it) }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ScannerContentPreview_error() {
+    ScannerContent(
+        isLocationRequiredAndDisabled = false,
+        uiState = UiState(
+            isScanning = true,
+            scanningState = ScanningState.Error("Internal error"),
+        ),
+        onClick = {},
+        deviceItem = { DeviceListItem(it) }
+    )
+}
+
+@Preview
+@Composable
+private fun DeviceListItemPreview() {
+    DeviceListItem(
+        iconPainter = painterResource(R.drawable.outline_bluetooth_24),
+        title = "Nordic HRM",
+        subtitle = "12:34:56:78:9A:BC",
+        trailingContent = {
+            RssiIcon(rssi = -60)
+        }
     )
 }
