@@ -72,6 +72,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,6 +115,9 @@ import no.nordicsemi.android.common.ui.view.NavigationDrawerTitle
 import no.nordicsemi.android.common.ui.view.NavigationDrawerTitleDefaults
 import no.nordicsemi.android.common.ui.view.NordicLargeAppBar
 import no.nordicsemi.android.common.ui.view.NordicLogo
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
+import javax.inject.Inject
 
 data class Item(val title: String, val destinationId: DestinationId<Unit, *>, val icon: ImageVector)
 
@@ -124,203 +128,219 @@ val Tabs = createSimpleDestination("tabs")
 val FirstTab = createSimpleDestination("first_tab")
 val SecondTab = createSimpleDestination("second_tab")
 
+private val menuItems = listOf(
+    Item("Main", Tabs, Icons.Filled.Verified),
+    Item("Settings", Settings, Icons.Filled.Settings),
+)
+
+private val advancedMenuItems = listOf(
+    Item("Advanced Settings", Advanced, Icons.Filled.ImageSearch),
+)
+
+private val tabs = listOf(
+    Item("Main", FirstTab, Icons.Filled.Verified),
+    Item("Inner Navigation", SecondTab, Icons.Filled.Navigation),
+    Item("Simple", ThirdTab, Icons.Filled.Album),
+)
+
 @AndroidEntryPoint
 class MainActivity : NordicActivity() {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @Inject
+    lateinit var environment: AndroidEnvironment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val menuItems = listOf(
-            Item("Main", Tabs, Icons.Filled.Verified),
-            Item("Settings", Settings, Icons.Filled.Settings),
-        )
-
-        val advancedMenuItems = listOf(
-            Item("Advanced Settings", Advanced, Icons.Filled.ImageSearch),
-        )
-
-        val tabs = listOf(
-            Item("Main", FirstTab, Icons.Filled.Verified),
-            Item("Inner Navigation", SecondTab, Icons.Filled.Navigation),
-            Item("Simple", ThirdTab, Icons.Filled.Album),
-        )
-
         setContent {
             NordicTheme {
-                val navigator: SimpleNavigationViewModel = hiltViewModel()
+                // The test app can run both as native or mock (there are 2 flavors).
+                // For each flavor a different `environment` is created (using Hilt, see .di module).
+                // Adding the environment to local composition allows to access it from any composable.
+                // For mock environment the `provides` method returns 2 values:
+                // - LocalEnvironment with the environment,
+                // - LocalActivityResultRegistryOwner, that can intercept Bluetooth permission requests.
+                CompositionLocalProvider(values = LocalEnvironmentOwner provides environment) {
+                    Content()
+                }
+            }
+        }
+    }
+}
 
-                val drawerState = rememberDrawerState(DrawerValue.Closed)
-                val scope = rememberCoroutineScope()
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Content() {
+    val navigator: SimpleNavigationViewModel = hiltViewModel()
 
-                // Note: This state is read in ScannerDestination.kt.
-                @Suppress("VariableNeverRead")
-                var isFilterOpen by LocalFilterState.current
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        ModalDrawerSheet(
-                            drawerState = drawerState,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .verticalScroll(rememberScrollState()),
-                        ) {
-                            val insets = WindowInsets.displayCutout
-                                .only(WindowInsetsSides.Start)
-                            Column(
-                                modifier = Modifier.padding(insets.asPaddingValues()),
-                            ) {
-                                NordicLogo(
-                                    modifier = Modifier
-                                        .padding(NavigationDrawerTitleDefaults.ItemPadding)
-                                        .padding(vertical = 16.dp)
-                                )
+    // Note: This state is read in ScannerDestination.kt.
+    @Suppress("VariableNeverRead")
+    var isFilterOpen by LocalFilterState.current
 
-                                NavigationDrawerTitle(
-                                    title = "Menu",
-                                    modifier = Modifier.padding(NavigationDrawerTitleDefaults.ItemPadding)
-                                )
-
-                                NavigationDrawerItems(
-                                    items = menuItems,
-                                    navigator = navigator,
-                                    onDismiss = { scope.launch { drawerState.close() } },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                                )
-
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(NavigationDrawerDividerDefaults.ItemPadding)
-                                )
-
-                                NavigationDrawerTitle(
-                                    title = "Advanced",
-                                    modifier = Modifier.padding(NavigationDrawerTitleDefaults.ItemPadding)
-                                )
-
-                                NavigationDrawerItems(
-                                    items = advancedMenuItems,
-                                    navigator = navigator,
-                                    onDismiss = { scope.launch { drawerState.close() } },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                                )
-
-                                NavigationDrawerItem(
-                                    icon = {
-                                        Icon(
-                                            Icons.Filled.BrokenImage,
-                                            contentDescription = null
-                                        )
-                                    },
-                                    label = { Text("This does nothing") },
-                                    selected = false,
-                                    onClick = { },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                                )
-                            }
-                        }
-                    }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerState = drawerState,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                val insets = WindowInsets.displayCutout
+                    .only(WindowInsetsSides.Start)
+                Column(
+                    modifier = Modifier.padding(insets.asPaddingValues()),
                 ) {
-                    val currentDestination by navigator.currentDestination()
-                        .collectAsStateWithLifecycle()
-                    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-                    Scaffold(
-                        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                        topBar = {
-                            NordicLargeAppBar(
-                                title = { Text(text = stringResource(id = R.string.title_main)) },
-                                showBackButton = currentDestination in listOf(
-                                    Hello,
-                                    HelloDialog,
-                                    ScannerDestinationId
-                                ),
-                                onNavigationButtonClick = { navigator.navigateUp() },
-                                onHamburgerButtonClick = {
-                                    scope.launch { drawerState.open() }
-                                },
-                                scrollBehavior = scrollBehavior,
-                                actions = {
-                                    if (navigator.isInHierarchy(ScannerDestinationId)
-                                            .collectAsStateWithLifecycle().value) {
-                                        if (LocalScanningState.current.value) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.padding(4.dp).size(24.dp),
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                                strokeWidth = 2.dp,
-                                            )
-                                        }
-                                        AppBarIcon(
-                                            imageVector = Icons.Default.FilterList,
-                                            contentDescription = null,
-                                            onClick = {
-                                                @Suppress("AssignedValueIsNeverRead")
-                                                isFilterOpen = true
-                                            }
-                                        )
-                                    }
-                                    val context = LocalContext.current
-                                    LoggerAppBarIcon(
-                                        onClick = {
-                                            Toast.makeText(
-                                                context,
-                                                "Logger clicked",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    )
-                                },
+                    NordicLogo(
+                        modifier = Modifier
+                            .padding(NavigationDrawerTitleDefaults.ItemPadding)
+                            .padding(vertical = 16.dp)
+                    )
+
+                    NavigationDrawerTitle(
+                        title = "Menu",
+                        modifier = Modifier.padding(NavigationDrawerTitleDefaults.ItemPadding)
+                    )
+
+                    NavigationDrawerItems(
+                        items = menuItems,
+                        navigator = navigator,
+                        onDismiss = { scope.launch { drawerState.close() } },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(NavigationDrawerDividerDefaults.ItemPadding)
+                    )
+
+                    NavigationDrawerTitle(
+                        title = "Advanced",
+                        modifier = Modifier.padding(NavigationDrawerTitleDefaults.ItemPadding)
+                    )
+
+                    NavigationDrawerItems(
+                        items = advancedMenuItems,
+                        navigator = navigator,
+                        onDismiss = { scope.launch { drawerState.close() } },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    NavigationDrawerItem(
+                        icon = {
+                            Icon(
+                                Icons.Filled.BrokenImage,
+                                contentDescription = null
                             )
                         },
-                        bottomBar = {
-                            // Show the Navigation Bar only in the Tabs destination.
-                            if (navigator.isInHierarchy(Tabs).collectAsStateWithLifecycle().value) {
-                                NavigationBar {
-                                    tabs.forEach { tab ->
-                                        val selected by navigator.isInHierarchy(tab.destinationId)
-                                            .collectAsStateWithLifecycle()
-                                        NavigationBarItem(
-                                            icon = { Icon(tab.icon, contentDescription = null) },
-                                            label = { Text(tab.title) },
-                                            selected = selected,
-                                            onClick = {
-                                                // Checking if the tab is not selected here
-                                                // is a workaround for an issue with how the navigation
-                                                // restores the previous stack when back button was used.
-                                                // See: https://issuetracker.google.com/issues/258237571
-                                                if (!selected) {
-                                                    navigator.navigateTo(tab.destinationId) {
-                                                        popUpToStartDestination {
-                                                            saveState = true
-                                                        }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                }
+                        label = { Text("This does nothing") },
+                        selected = false,
+                        onClick = { },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
+            }
+        }
+    ) {
+        val currentDestination by navigator.currentDestination()
+            .collectAsStateWithLifecycle()
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                NordicLargeAppBar(
+                    title = { Text(text = stringResource(id = R.string.title_main)) },
+                    showBackButton = currentDestination in listOf(
+                        Hello,
+                        HelloDialog,
+                        ScannerDestinationId
+                    ),
+                    onNavigationButtonClick = { navigator.navigateUp() },
+                    onHamburgerButtonClick = {
+                        scope.launch { drawerState.open() }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    actions = {
+                        if (navigator.isInHierarchy(ScannerDestinationId)
+                                .collectAsStateWithLifecycle().value) {
+                            if (LocalScanningState.current.value) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.padding(4.dp).size(24.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    strokeWidth = 2.dp,
+                                )
+                            }
+                            AppBarIcon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = null,
+                                onClick = {
+                                    @Suppress("AssignedValueIsNeverRead")
+                                    isFilterOpen = true
+                                }
+                            )
+                        }
+                        val context = LocalContext.current
+                        LoggerAppBarIcon(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Logger clicked",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    },
+                )
+            },
+            bottomBar = {
+                // Show the Navigation Bar only in the Tabs destination.
+                if (navigator.isInHierarchy(Tabs).collectAsStateWithLifecycle().value) {
+                    NavigationBar {
+                        tabs.forEach { tab ->
+                            val selected by navigator.isInHierarchy(tab.destinationId)
+                                .collectAsStateWithLifecycle()
+                            NavigationBarItem(
+                                icon = { Icon(tab.icon, contentDescription = null) },
+                                label = { Text(tab.title) },
+                                selected = selected,
+                                onClick = {
+                                    // Checking if the tab is not selected here
+                                    // is a workaround for an issue with how the navigation
+                                    // restores the previous stack when back button was used.
+                                    // See: https://issuetracker.google.com/issues/258237571
+                                    if (!selected) {
+                                        navigator.navigateTo(tab.destinationId) {
+                                            popUpToStartDestination {
+                                                saveState = true
                                             }
-                                        )
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        contentWindowInsets = WindowInsets.statusBars
-                    ) { padding ->
-                        // This is a workaround for the issue with the back button going back
-                        // to the previous tab instead of closing the drawer.
+                            )
+                        }
+                    }
+                }
+            },
+            contentWindowInsets = WindowInsets.statusBars
+        ) { padding ->
+            // This is a workaround for the issue with the back button going back
+            // to the previous tab instead of closing the drawer.
 //                        BackHandler(
 //                            enabled = drawerState.isOpen,
 //                            onBack = { scope.launch { drawerState.close() } }
 //                        )
-                        NavigationView(
-                            destinations = listOf(
-                                Tabs with ((FirstTab with MainDestinations) + (SecondTab with SecondDestinations) + ThirdDestination),
-                                SettingsDestination,
-                                AdvancedDestination,
-                            ),
-                            modifier = Modifier.padding(padding)
-                        )
-                    }
-                }
-            }
+            NavigationView(
+                destinations = listOf(
+                    Tabs with ((FirstTab with MainDestinations) + (SecondTab with SecondDestinations) + ThirdDestination),
+                    SettingsDestination,
+                    AdvancedDestination,
+                ),
+                modifier = Modifier.padding(padding)
+            )
         }
     }
 }

@@ -45,6 +45,7 @@ import no.nordicsemi.android.common.scanner.data.SortByRssi
 import no.nordicsemi.android.common.scanner.data.SortingDisabled
 import no.nordicsemi.android.common.scanner.data.SortingOption
 import no.nordicsemi.kotlin.ble.client.android.ConjunctionFilterScope
+import no.nordicsemi.kotlin.ble.client.android.ScanResult
 
 /**
  * Represents the state of the scanner, including available filters and sorting options.
@@ -59,6 +60,13 @@ interface ScanFilterState {
      * The filter to be applied to all scan results.
      */
     val filter: ConjunctionFilterScope.() -> Unit
+
+    /**
+     * A filter to be applied to each scan result after it has been filtered by the [filter].
+     *
+     * This allows to apply additional filtering based on the scan result properties.
+     */
+    val scanResultFilter: (ScanResult) -> Boolean
 
     /**
      * The list of filters that can be applied to the scanner results.
@@ -123,6 +131,7 @@ interface ScanFilterState {
  * Creates a [ScanFilterState] that can be used to manage the state of the scanner.
  *
  * @param filter A static filter to be applied to all scan results. Defaults to an empty filter.
+ * @param scanResultFilter A filter to be applied to each scan result. Defaults to connectable devices.
  * @param dynamicFilters The list of filters to be shown in the scanner. Defaults to a list containing
  * [OnlyNearby], [OnlyWithNames].
  * @param sortingOptions The list of sorting options to be shown in the scanner. Defaults to a list
@@ -132,6 +141,7 @@ interface ScanFilterState {
 @Composable
 fun rememberFilterState(
     filter: ConjunctionFilterScope.() -> Unit = {},
+    scanResultFilter: (ScanResult) -> Boolean = { it.isConnectable },
     dynamicFilters: List<Filter> = listOf(
         OnlyNearby(),
         OnlyWithNames(isInitiallySelected = true),
@@ -147,6 +157,7 @@ fun rememberFilterState(
 
     return object : ScanFilterState {
         override val filter: ConjunctionFilterScope.() -> Unit = filter
+        override val scanResultFilter: (ScanResult) -> Boolean = scanResultFilter
         override val dynamicFilters: List<Filter> = dynamicFilters
         override val sortingOptions: List<SortingOption> = sortingOptions
 

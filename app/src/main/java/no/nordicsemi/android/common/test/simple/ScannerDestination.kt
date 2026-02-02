@@ -104,6 +104,9 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
 //        filter = {
 //            ServiceUuid(Uuid.fromShortUuid(0x180D))
 //        },
+        // Show all devices, not only connectable.
+        scanResultFilter = { true },
+        // Specify some dynamic filters.
         dynamicFilters = listOf(
             OnlyNearby(),
             OnlyWithNames(),

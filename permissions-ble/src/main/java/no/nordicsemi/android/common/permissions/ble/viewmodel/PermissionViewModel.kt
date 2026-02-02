@@ -31,16 +31,11 @@
 
 package no.nordicsemi.android.common.permissions.ble.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import no.nordicsemi.android.common.permissions.ble.BlePermissionNotAvailableReason
-import no.nordicsemi.android.common.permissions.ble.bluetooth.BluetoothStateManager
-import no.nordicsemi.android.common.permissions.ble.location.LocationStateManager
-import no.nordicsemi.android.common.permissions.ble.util.BlePermissionState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import javax.inject.Inject
 
 /**
@@ -48,42 +43,30 @@ import javax.inject.Inject
  */
 @HiltViewModel
 internal class PermissionViewModel @Inject internal constructor(
-    private val bluetoothManager: BluetoothStateManager,
-    private val locationManager: LocationStateManager,
+    val environment: AndroidEnvironment,
 ) : ViewModel() {
-    val bluetoothState = bluetoothManager.bluetoothState()
-        .stateIn(
-            viewModelScope, SharingStarted.Lazily,
-            BlePermissionState.NotAvailable(BlePermissionNotAvailableReason.NOT_AVAILABLE)
-        )
 
-    val locationPermission = locationManager.locationState()
-        .stateIn(
-            viewModelScope, SharingStarted.Lazily,
-            BlePermissionState.NotAvailable(BlePermissionNotAvailableReason.NOT_AVAILABLE)
-        )
+    private val _bluetoothPermissionFlow =
+        MutableStateFlow(isBluetoothPermissionGrantedOrNotRequired)
+    val bluetoothPermissionFlow = _bluetoothPermissionFlow.asStateFlow()
+
+    private val _locationPermissionFlow =
+        MutableStateFlow(isLocationPermissionGrantedOrNotRequired)
+    val locationPermissionFlow = _locationPermissionFlow.asStateFlow()
 
     fun refreshBluetoothPermission() {
-        bluetoothManager.refreshPermission()
+        _bluetoothPermissionFlow.value = isBluetoothPermissionGrantedOrNotRequired
     }
 
     fun refreshLocationPermission() {
-        locationManager.refreshPermission()
+        _locationPermissionFlow.value = isLocationPermissionGrantedOrNotRequired
     }
 
-    fun markLocationPermissionRequested() {
-        locationManager.markLocationPermissionRequested()
-    }
+    private val isBluetoothPermissionGrantedOrNotRequired
+        get() = !environment.requiresBluetoothRuntimePermissions ||
+                 environment.isBluetoothScanPermissionGranted
 
-    fun markBluetoothPermissionRequested() {
-        bluetoothManager.markBluetoothPermissionRequested()
-    }
-
-    fun isBluetoothScanPermissionDeniedForever(context: Context): Boolean {
-        return bluetoothManager.isBluetoothScanPermissionDeniedForever(context)
-    }
-
-    fun isLocationPermissionDeniedForever(context: Context): Boolean {
-        return locationManager.isLocationPermissionDeniedForever(context)
-    }
+    private val isLocationPermissionGrantedOrNotRequired
+        get() = !environment.isLocationRequiredForScanning ||
+                 environment.isLocationPermissionGranted
 }

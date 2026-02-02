@@ -59,4 +59,6 @@ dokka {
 
 dependencies {
     implementation(project(":ui"))
+    // The screen is using AndroidEnvironment to get the Bluetooth state and permissions.
+    implementation(nordic.blek.core.android)
 }
