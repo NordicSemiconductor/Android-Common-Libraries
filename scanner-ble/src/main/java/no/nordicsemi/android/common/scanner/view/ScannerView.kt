@@ -214,6 +214,9 @@ internal fun DeviceListItem(
     result: ScanResult,
     @DrawableRes peripheralIcon: Int? = result.advertisingData.serviceUuids
         .firstNotNullOfOrNull { ServiceUuids.getServiceInfo(it)?.icon }
+        ?: result.advertisingData.meshBeacon?.let { R.drawable.ic_mesh }
+        ?: result.advertisingData.meshMessage?.let { R.drawable.ic_mesh }
+        ?: result.advertisingData.meshPbAdv?.let { R.drawable.ic_mesh }
         ?: R.drawable.outline_bluetooth_24,
 ) {
     DeviceListItem(
