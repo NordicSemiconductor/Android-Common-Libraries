@@ -24,9 +24,9 @@ object EnvironmentModule {
     ): NativeAndroidEnvironment {
         // Make sure the environment is closed when the lifecycle is cleared.
         // This will unregister the broadcast receiver.
-        return NativeAndroidEnvironment.getInstance(context, true)
-            .also { env ->
-                lifecycle.addOnClearedListener { env.close() }
+        return NativeAndroidEnvironment.getInstance(context, isNeverForLocationFlagSet = true)
+            .also { 
+                lifecycle.addOnClearedListener { it.close() }
             }
     }
 }
