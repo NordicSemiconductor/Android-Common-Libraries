@@ -59,12 +59,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import no.nordicsemi.android.common.permissions.ble.R
 import no.nordicsemi.android.common.permissions.ble.viewmodel.PermissionViewModel
 import no.nordicsemi.android.common.ui.view.WarningView
-
-// This view can be mocked on platforms before Android S, so let's keep the Permission
-// values locally.
-private const val BLUETOOTH_CONNECT = "android.permission.BLUETOOTH_CONNECT"
-private const val BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN"
-private const val BLUETOOTH_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 
 @Composable
 internal fun BluetoothPermissionRequiredView() {
@@ -80,9 +75,9 @@ internal fun BluetoothPermissionRequiredView() {
             .verticalScroll(rememberScrollState())
     ) {
         val requiredPermissions = arrayOf(
-            /* Manifest.permission. */BLUETOOTH_SCAN,
-            /* Manifest.permission. */BLUETOOTH_CONNECT,
-            /* Manifest.permission. */BLUETOOTH_ADVERTISE,
+            AndroidEnvironment.Permission.BLUETOOTH_SCAN,
+            AndroidEnvironment.Permission.BLUETOOTH_CONNECT,
+            AndroidEnvironment.Permission.BLUETOOTH_ADVERTISE,
         )
 
         val launcher = rememberLauncherForActivityResult(
@@ -94,7 +89,7 @@ internal fun BluetoothPermissionRequiredView() {
                  * does not request that permission — the host app or a dependent module must
                  * declare it in the manifest if BLE advertising is required.
                  */
-                permissionDenied = result[/* Manifest.permission. */BLUETOOTH_SCAN] != true
+                permissionDenied = result[AndroidEnvironment.Permission.BLUETOOTH_SCAN] != true
                 viewModel.refreshBluetoothPermission()
             }
         )
