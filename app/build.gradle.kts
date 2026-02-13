@@ -38,6 +38,17 @@ group = "no.nordicsemi.android.common"
 
 android {
     namespace = "no.nordicsemi.android.common.test"
+
+    flavorDimensions += listOf("mode")
+    productFlavors {
+        create("native") {
+            isDefault = true
+            dimension = "mode"
+        }
+        create("mock") {
+            dimension = "mode"
+        }
+    }
 }
 
 dependencies {
@@ -52,8 +63,14 @@ dependencies {
     implementation(project(":permissions-notification"))
     implementation(project(":scanner-ble"))
 
-    // Sample app uses native Android client.
-    implementation(nordic.blek.client.android)
+    // The sample app defines 2 flavors (see above): native and mock.
+    // Each of them is using a different environment implementation.
+    "nativeImplementation"(nordic.blek.client.android)
+    "mockImplementation"(nordic.blek.client.android.mock)
+    // And both use the Compose extension. This extension has its own
+    // optional dependencies to both of them (compileOnly), so once of
+    // the above has to be included.
+    implementation(nordic.blek.environment.android.compose)
 
     implementation(libs.androidx.compose.material.icons.extended)
 

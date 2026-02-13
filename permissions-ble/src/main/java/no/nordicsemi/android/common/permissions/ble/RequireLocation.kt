@@ -36,7 +36,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.permissions.ble.util.BlePermissionState
 import no.nordicsemi.android.common.permissions.ble.view.LocationPermissionRequiredView
 import no.nordicsemi.android.common.permissions.ble.viewmodel.PermissionViewModel
 
@@ -73,18 +72,21 @@ fun RequireLocation(
     content: @Composable (isLocationRequiredAndDisabled: Boolean) -> Unit,
 ) {
     val viewModel = hiltViewModel<PermissionViewModel>()
-    val state by viewModel.locationPermission.collectAsStateWithLifecycle()
+    val environment = viewModel.environment
+    val isLocationEnabled by environment.locationState.collectAsStateWithLifecycle()
+    val locationAvailable by viewModel.locationPermissionFlow.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state) {
-        onChanged(state is BlePermissionState.Available || (state as BlePermissionState.NotAvailable).reason == BlePermissionNotAvailableReason.DISABLED)
+    LaunchedEffect(isLocationEnabled, locationAvailable) {
+        onChanged(isLocationEnabled && locationAvailable)
     }
 
-    when (val s = state) {
-        is BlePermissionState.NotAvailable -> when (s.reason) {
-            BlePermissionNotAvailableReason.DISABLED -> content(true)
-            else -> contentWithoutLocation()
+    if (environment.isLocationRequiredForScanning) {
+        if (environment.isLocationPermissionGranted) {
+            content(!isLocationEnabled)
+        } else {
+            contentWithoutLocation()
         }
-
-        BlePermissionState.Available -> content(false)
+    } else {
+        content(false)
     }
 }

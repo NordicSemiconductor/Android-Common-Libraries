@@ -31,17 +31,16 @@
 
 package no.nordicsemi.android.common.permissions.ble
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.permissions.ble.util.BlePermissionState
 import no.nordicsemi.android.common.permissions.ble.view.BluetoothDisabledView
 import no.nordicsemi.android.common.permissions.ble.view.BluetoothNotAvailableView
 import no.nordicsemi.android.common.permissions.ble.view.BluetoothPermissionRequiredView
 import no.nordicsemi.android.common.permissions.ble.viewmodel.PermissionViewModel
+import no.nordicsemi.kotlin.ble.core.Manager
 
 /**
  * The reason why the BLE permission is not available.
@@ -90,15 +89,25 @@ fun RequireBluetooth(
     content: @Composable () -> Unit,
 ) {
     val viewModel = hiltViewModel<PermissionViewModel>()
-    val state by viewModel.bluetoothState.collectAsStateWithLifecycle()
+    val environment = viewModel.environment
+    val state by environment.bluetoothState.collectAsStateWithLifecycle()
+    val bluetoothAvailable by viewModel.bluetoothPermissionFlow.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state) {
-        onChanged(state is BlePermissionState.Available)
+    LaunchedEffect(state, bluetoothAvailable) {
+        val bluetoothEnabled = state == Manager.State.POWERED_ON
+        onChanged(bluetoothEnabled && bluetoothAvailable)
     }
 
-    when (val s = state) {
-        BlePermissionState.Available -> content()
-        is BlePermissionState.NotAvailable -> contentWithoutBluetooth(s.reason)
+    when (state) {
+        Manager.State.POWERED_ON -> {
+            if (bluetoothAvailable) {
+                content()
+            } else {
+                contentWithoutBluetooth(BlePermissionNotAvailableReason.PERMISSION_REQUIRED)
+            }
+        }
+        Manager.State.UNSUPPORTED -> contentWithoutBluetooth(BlePermissionNotAvailableReason.NOT_AVAILABLE)
+        else -> contentWithoutBluetooth(BlePermissionNotAvailableReason.DISABLED)
     }
 }
 
@@ -106,13 +115,19 @@ fun RequireBluetooth(
 private fun NoBluetoothView(
     reason: BlePermissionNotAvailableReason,
 ) {
-    when (reason) {
-        BlePermissionNotAvailableReason.NOT_AVAILABLE -> BluetoothNotAvailableView()
-        BlePermissionNotAvailableReason.PERMISSION_REQUIRED ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BluetoothPermissionRequiredView()
-            }
+    val viewModel = hiltViewModel<PermissionViewModel>()
+    val environment = viewModel.environment
 
-        BlePermissionNotAvailableReason.DISABLED -> BluetoothDisabledView()
+    when (reason) {
+        BlePermissionNotAvailableReason.NOT_AVAILABLE ->
+            BluetoothNotAvailableView()
+
+        BlePermissionNotAvailableReason.PERMISSION_REQUIRED ->
+            BluetoothPermissionRequiredView()
+
+        BlePermissionNotAvailableReason.DISABLED ->
+            BluetoothDisabledView(
+                onEnable = { environment.enableBluetooth() }
+            )
     }
 }

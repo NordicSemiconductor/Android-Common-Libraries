@@ -47,8 +47,8 @@ import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.scanner.ScanFilterState
 import no.nordicsemi.android.common.scanner.data.ScannedPeripheral
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.exception.BluetoothUnavailableException
 import no.nordicsemi.kotlin.ble.client.exception.ScanningException
+import no.nordicsemi.kotlin.ble.core.exception.BluetoothUnavailableException
 import no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -87,8 +87,8 @@ internal class ScannerViewModel @Inject constructor(
         this.timeout = timeout
 
         if (!wasScanningStarted) {
-            startScanning()
             wasScanningStarted = true
+            startScanning()
         }
     }
 
@@ -114,7 +114,7 @@ internal class ScannerViewModel @Inject constructor(
                 }
             }
             // Filter out the scan results based on the provided filter in the scanResultFilter.
-            .filter { it.isConnectable }
+            .filter { filterState.scanResultFilter(it) }
             .onEach { scanResult ->
                 // Check if the device is already in the list.
                 val existingIndex = scanResults.indexOfFirst { scanResult.peripheral == it.peripheral }

@@ -5,9 +5,14 @@
 
 [versions]
 log = "2.5.0"
-blek = "2.0.0-alpha12"
+blek = "2.0.0-alpha14"
 
 [libraries]
 log = { group = "no.nordicsemi.android", name = "log", version.ref = "log" }
+blek-core-android = { group = "no.nordicsemi.kotlin.ble", name = "core-android", version.ref = "blek" }
 blek-client-core-android = { group = "no.nordicsemi.kotlin.ble", name = "client-core-android", version.ref = "blek" }
 blek-client-android = { group = "no.nordicsemi.kotlin.ble", name = "client-android", version.ref = "blek" }
+blek-client-android-mock = { group = "no.nordicsemi.kotlin.ble", name = "client-android-mock", version.ref = "blek" }
+blek-environment-android = { group = "no.nordicsemi.kotlin.ble", name = "environment-android", version.ref = "blek" }
+blek-environment-android-mock = { group = "no.nordicsemi.kotlin.ble", name = "environment-android-mock", version.ref = "blek" }
+blek-environment-android-compose = { group = "no.nordicsemi.kotlin.ble", name = "environment-android-compose", version.ref = "blek" }

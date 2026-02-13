@@ -62,35 +62,8 @@ import no.nordicsemi.android.common.ui.view.WarningView
 @Composable
 internal fun LocationPermissionRequiredView() {
     val viewModel = hiltViewModel<PermissionViewModel>()
-    val context = LocalContext.current
-    var permissionDenied by remember { mutableStateOf(viewModel.isLocationPermissionDeniedForever(context)) }
+    var permissionDenied by remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) {
-        viewModel.markLocationPermissionRequested()
-        permissionDenied = viewModel.isLocationPermissionDeniedForever(context)
-        viewModel.refreshLocationPermission()
-    }
-
-    LocationPermissionRequiredView(
-        permissionDenied = permissionDenied,
-        onGrantClicked = {
-            val requiredPermissions = arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            launcher.launch(requiredPermissions)
-        },
-        onOpenSettingsClicked = { openPermissionSettings(context) },
-    )
-}
-
-@Composable
-internal fun LocationPermissionRequiredView(
-    permissionDenied: Boolean,
-    onGrantClicked: () -> Unit,
-    onOpenSettingsClicked: () -> Unit,
-) {
     WarningView(
         painterResource = painterResource(R.drawable.baseline_location_off_24),
         title = stringResource(id = R.string.location_permission_title),
@@ -99,12 +72,24 @@ internal fun LocationPermissionRequiredView(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            permissionDenied = !granted
+            viewModel.refreshLocationPermission()
+        }
+
         if (!permissionDenied) {
-            Button(onClick = onGrantClicked) {
+            Button(
+                onClick = { launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION) }
+            ) {
                 Text(text = stringResource(id = R.string.action_grant_permission))
             }
         } else {
-            Button(onClick = onOpenSettingsClicked) {
+            val context = LocalContext.current
+            Button(
+                onClick = { openPermissionSettings(context) }
+            ) {
                 Text(text = stringResource(id = R.string.action_settings))
             }
         }
@@ -125,11 +110,7 @@ private fun openPermissionSettings(context: Context) {
 @Composable
 private fun LocationPermissionRequiredView_Preview() {
     MaterialTheme {
-        LocationPermissionRequiredView(
-            permissionDenied = false,
-            onGrantClicked = { },
-            onOpenSettingsClicked = { },
-        )
+        LocationPermissionRequiredView()
     }
 }
 

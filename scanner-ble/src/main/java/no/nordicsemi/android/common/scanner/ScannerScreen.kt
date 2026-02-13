@@ -67,6 +67,7 @@ import kotlin.time.Duration
  * @param state The state of the scan filter. Use this to set a static filter and dynamic filters.
  * @param title Composable function to display the title of the App Bar.
  * @param timeout The duration after which the scan will stop. Defaults to [Duration.INFINITE].
+ * @param verticalArrangement The vertical arrangement of the devices in the list.
  * @param deviceItem Composable function to display each device in the list.
  */
 @Composable
